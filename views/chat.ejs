@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="jesusemoji.png" type="image/x-icon">
+    <title>Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
+
+</head>
+
+<body>
+    <div class="chat-container">
+        <!-- Static Top Bar -->
+        <div class="top-bar">
+            <div id="top-bar-contain">
+                <div class="logoContain">
+
+                    <a class="logoText" href="https://mychristianai.com/"><img class="logo" src="/jesusemoji.png"></a>
+                    <a class="logoText" href="https://mychristianai.com/">My Christian AI</a>
+
+                </div>
+
+                <!-- Dropdown for Christian Denominations -->
+                <div id="selectMenuDiv">
+
+                    <a href="/logout" class="logout-button">Logout</a>
+
+                    <div class="user-profile">
+                        <% if (user) { %>
+                            <p>
+                                Peace be with you, <%= user.first_name + " " + user.last_name %>
+                            </p>
+                            <% } else { %>
+                                <p>User not available</p>
+                                <% } %>
+                    </div>
+                    <select id="denomination" class="selectMenu">
+                        <option value="christian">Christian</option>
+                        <option value="Pre-Nicene">Early Christian (Pre-Nicene)</option>
+                        <option value="catholic">Catholic</option>
+                        <option value="orthodox">Orthodox</option>
+                        <option value="anglican">Anglican</option>
+                        <option value="lutheran">Lutheran</option>
+                        <option value="calvinist">Calvinist</option>
+                        <option value="anabaptist">Anabaptist</option>
+                        <option value="baptist">Baptist</option>
+                        <option value="methodist">Methodist</option>
+                        <option value="congregational">Congregational</option>
+                        <option value="quaker">Quaker</option>
+                        <option value="episcopal">Episcopal</option>
+                        <option value="pentecostal">Pentecostal</option>
+                        <option value="adventist">Seventh-day Adventist</option>
+                        <option value="nazarene">Church of the Nazarene</option>
+                        <option value="charismatic">Charismatic</option>
+                        <option value="mormon">Mormon</option>
+                        <option value="jehovahs witness">Jehovah's Witness</option>
+                        <option value="secular">Secular</option>
+                    </select>
+
+                    <!-- Dropdown for Bible Characters -->
+                    <select id="character" class="selectMenu">
+                        <option value="minister">Minister</option>
+                        <option value="jesus">Jesus</option>
+                        <option value="john">John the Baptist</option>
+                        <option value="mary the mother of jesus">Mary, Mother of Jesus</option>
+                        <option value="moses">Moses</option>
+                        <option value="david">David</option>
+                        <option value="abraham">Abraham</option>
+                        <option value="paul">Paul</option>
+                        <option value="peter">Peter</option>
+                        <option value="adam">Adam</option>
+                        <option value="eve">Eve</option>
+                        <option value="noah">Noah</option>
+                        <option value="isaac">Isaac</option>
+                        <option value="jacob">Jacob</option>
+                        <option value="joseph">Joseph</option>
+                        <option value="bible">Bible (replies in bible verses)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div class="messages-container">
+            <ul id="messages">
+
+            </ul> <!-- Messages list -->
+        </div>
+
+        <!-- Static Bottom Bar -->
+        <div class="bottom-bar">
+            <form action="">
+                <input id="messageInput" autocomplete="off" /></input><button id="send">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        if (window.location.hash && window.location.hash == '#_=_') {
+            if (window.history && history.pushState) {
+                window.history.pushState("", document.title, window.location.pathname);
+            } else {
+                // Older browsers without pushState support
+                var scroll = {
+                    top: document.body.scrollTop,
+                    left: document.body.scrollLeft
+                };
+                window.location.hash = '';
+                document.body.scrollTop = scroll.top;
+                document.body.scrollLeft = scroll.left;
+            }
+        }
+
+        let addBR = false;
+        let isWaitingForResponse = false;
+
+        document.addEventListener("DOMContentLoaded", () => {
+
+            document.getElementById("denomination").value = "christian";
+            document.getElementById('messageInput').focus();
+
+            let invisibleText = "---";
+            for (i = 0; i < 90; i++) {
+                invisibleText = "---" + invisibleText
+            }
+            let item = document.createElement('div');
+            item.id = "invisimessage"
+            item.classList.add('botMsg');
+            item.textContent = invisibleText;
+            document.getElementById('messages').appendChild(item);
+
+            const socket = io();
+
+            document.querySelector('form').addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                if (isWaitingForResponse) {
+                    return false; // Prevent form submission
+                }
+
+                isWaitingForResponse = true; // Set flag to true as waiting for response
+
+                let message = {
+                    message: document.getElementById('messageInput').value,
+                    character: document.getElementById('character').value,
+                    denomination: document.getElementById('denomination').value
+                };
+
+                socket.emit('chat message', message);
+
+                document.getElementById('messageInput').value = '';
+                return false;
+            });
+
+            socket.on('chat message', (msg) => {
+                console.log(msg);
+                document.getElementById("send").innerHTML = "...";
+                item = document.createElement('div');
+
+                // Create a new div to act as the container for this message
+                let msgContainer = document.createElement('div');
+                msgContainer.classList.add('msgContain');
+
+                if (msg.sender == "bot") {
+                    item.classList.add('botMsg');
+                    document.getElementById("send").innerHTML = "Send";
+                } else {
+                    item.classList.add('clientMsg');
+                }
+
+                item.textContent = msg.reply;
+
+                // Append the message item to the container
+                msgContainer.appendChild(item);
+
+                // Append the message container to the overall messages container
+                document.getElementById('messages').appendChild(msgContainer);
+
+                if (addBR == true) {
+                    isWaitingForResponse = false; // Reset flag as response received
+                    addBR = false;
+                } else {
+                    addBR = true;
+                }
+
+                let messagesContainer = document.querySelector('.messages-container');
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            });
+        });
+    </script>
+</body>
+
+</html>
