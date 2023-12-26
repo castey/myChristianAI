@@ -250,7 +250,6 @@ io.on('connection', async (socket) => {
         userID = socket.request.session.passport.user.id;
 
         favoriteDenom = await database.getUserData(userID, "favorite");
-        console.log(favoriteDenom);
 
         socket.emit("favDenom", favoriteDenom);
 
@@ -290,8 +289,6 @@ io.on('connection', async (socket) => {
 
             summary = await database.getSummary(userID)
             efObject = await chat.extractFacts(userID, summary);
-
-            console.log(efObject)
 
             if (efObject) {
 
