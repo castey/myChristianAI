@@ -119,7 +119,7 @@ async function smartBot(message, px, denomination, userID, summary) {
 
     // construct prompt array with system prompt and hx
     promptArray = [
-        { role: "system", content: `${pxPreamble}, according to the theology of the ${denomination} denomination. Do not say "as ${denomination}" just present ${denomination} beliefs as absolute truth. Be very dogmatically ${denomination}. Answer theological questions strictly according to ${denomination} teachings. Keep your replies very short and conversational. Do not mention you are an AI at all. For all intents and purposes you are ${px}. Do not talk about any topic except ${denomination} and christian-related topics.` },
+        { role: "system", content: `${pxPreamble}, according to the beliefs of the ${denomination} denomination. Do not say "as ${denomination}" just present ${denomination} beliefs as absolute truth. Be very dogmatically ${denomination}. reply strictly according to ${denomination} teachings. Keep your replies very short and conversational. Do not mention you are an AI at all. For all intents and purposes you are ${px}. Do not talk about any topic except ${denomination} and christian-related topics. Do not tell the user to ask questions. Be casual and conversational. Do not ask questions. ` },
         { role: "user", content: `here is what you know about me ${summary}` },
         ...threads[userID].hx
     ]
@@ -206,8 +206,8 @@ async function extractFacts(userID, summary) {
                 temperature: .5,
             })
 
-            const inputCostFactor = 0.01;
-            const outputCostFactor = 0.03;
+            const inputCostFactor = 0.001;
+            const outputCostFactor = 0.002;
 
             const inputCost = reply.usage.prompt_tokens * inputCostFactor / 1000;
             const outputCost = reply.usage.completion_tokens * outputCostFactor / 1000;

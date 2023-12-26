@@ -3,8 +3,9 @@
 
 <head>
     <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="jesusemoji.png" type="image/x-icon">
 
-    <title>Login</title>
+    <title>Login - My Christian AI</title>
     <style>
         body {
             text-align: center;
@@ -30,16 +31,32 @@
             border-radius: 5px;
         }
 
-        .loginBox{
+        .loginBox {
             background-color: rgb(73, 0, 0);
             border: rgb(24, 24, 24) solid 2px;
             padding: 40px;
             max-width: 1111px;
             border-radius: 40px;
         }
-        .logo{
+
+        .logo {
             height: 200px;
             width: 200px;
+        }
+
+        .pplink {
+            color: white;
+            text-decoration: underline;
+            width: 100%;
+            font-size: 12px;
+        }
+
+        .pplink:hover {
+            color: grey;
+            text-decoration: underline;
+        }
+        .pplinkdiv{
+            margin-top: 14px;
         }
     </style>
 </head>
@@ -50,6 +67,9 @@
         <h2>Welcome to MyChristianAI.com!</h2>
         <p>Serving Christ through technology</p>
         <a href="/auth/facebook" class="login-button">Login with Facebook</a>
+        <div class="pplinkdiv"><a href="/privacy-policy" class="pplink">Privacy Policy</a></div>
+        <div class="pplinkdiv"><a href="/terms-of-service" class="pplink">Terms of Service</a></div>
+
     </div>
 </body>
 

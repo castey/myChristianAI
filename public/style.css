@@ -200,19 +200,26 @@ button {
     /* Thumb and track color */
 }
 
-.logout-button {
+.logout-button, .settings-button {
     float: right;
-    margin-top: 11px;
+    margin-top: 6px;
     font-family: 'Libre Baskerville';
     color: white;
     background-color: #2e0004;
-    font-size: 16px;
+    font-size: 36px;
     text-decoration: none;
     border-radius: 16px;
-    padding: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
     transition: background-color .6s ease;
-    margin-right: 9px;
+    margin-right: 18px;
 }
-.logout-button:hover {
+
+.logout-button{
+    font-size: 22px;
+    padding: 8px;
+    margin-top: 14px;
+}
+.logout-button:hover, .settings-button:hover {
     background-color: #a3000e;
 }

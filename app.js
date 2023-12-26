@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const chat = require('./chatbot.js')
 require('dotenv').config();
 const database = require("./database.js");
+const { emit } = require('process');
 
 const app = express();
 const server = require('http').createServer(app);
@@ -108,12 +109,106 @@ app.post('/data-deletion', async (req, res) => {
 
         // Respond with a confirmation code or message
         res.status(200).json({ success: true, message: 'User data deleted successfully.' });
-        
+
     } catch (error) {
         console.error('Data Deletion Error:', error);
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 });
+
+// ToS endpoint
+app.get("/terms-of-service", (req, res) => {
+    res.render('terms')
+});
+
+// privacy policy endpoint
+app.get("/privacy-policy", (req, res) => {
+    res.render('policy')
+});
+
+app.post("delete-data", isAuthenticated, async (req, res)=>{
+    database.deleteUser(req.user.id)
+
+    return res.redirect('/logout');
+
+})
+
+app.post("/download-data", isAuthenticated, async (req, res) => {
+    try {
+        // Retrieve data
+        let userData = await database.getAllUserData(req.user.id);
+
+        // Convert data to JSON format (if not already in JSON format)
+        let jsonData = JSON.stringify(userData);
+
+        // Set headers for file download
+        res.setHeader('Content-Disposition', 'attachment; filename=user-data.json');
+        res.setHeader('Content-Type', 'application/json');
+
+        // Send the data
+        res.send(jsonData);
+    } catch (error) {
+        // Handle any errors
+        console.error("Error fetching user data:", error);
+        res.status(500).send("An error occurred while fetching user data.");
+    }
+});
+
+app.post("/settings-submit", isAuthenticated, async (req, res) => {
+    try {
+        // Extract data from the request body
+        const { favoriteDenomination, email } = req.body;
+        const userID = req.user.id; // Assuming the user ID is stored in req.user.id
+
+        // Input validation (basic example)
+        if (!email || !favoriteDenomination) {
+            // Handle invalid input - redirect back with an error message
+            return res.redirect('/settings?error=Missing required fields');
+        }
+
+        // Validate email format (simple regex example)
+        if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+            // Handle invalid email format - redirect back with an error message
+            return res.redirect('/settings?error=Invalid email format');
+        }
+
+        // Update favorite denomination
+        await database.updateUserData(userID, "favorite", favoriteDenomination);
+
+        // Update email
+        await database.updateUserData(userID, "email", email);
+
+        // Redirect back to settings with a success message
+        res.redirect('/');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+});
+
+
+// settings endpoint
+app.get("/settings", isAuthenticated, async (req, res) => {
+
+    const userObject = {
+        id: req.user.id,
+        first_name: req.user.name.givenName,
+        last_name: req.user.name.familyName,
+        email: req.user.emails[0].value
+    };
+
+    email = await database.getUserData(req.user.id, "email");
+    favorite = await database.getUserData(req.user.id, "favorite");
+
+    databaseObject = {
+        email: email,
+        favorite: favorite
+    }
+
+    console.log(databaseObject)
+    res.render('settings', { user: databaseObject })
+
+})
 
 // Chat interface for authenticated users
 app.get('/', isAuthenticated, async (req, res) => {
@@ -137,6 +232,11 @@ io.on('connection', async (socket) => {
     if (socket.request.session && socket.request.session.passport && socket.request.session.passport.user) {
 
         userID = socket.request.session.passport.user.id;
+
+        favoriteDenom = await database.getUserData(userID, "favorite");
+        console.log(favoriteDenom);
+
+        socket.emit("favDenom", favoriteDenom);
 
         console.log('Authenticated user connected');
 
@@ -191,6 +291,6 @@ io.on('connection', async (socket) => {
 });
 
 // Starting the server with the HTTP server instance
-server.listen(3000, () => {
-    console.log(`Server is running on port:3000`);
+server.listen(process.env.PORT, () => {
+    console.log(`Server is running on port:${process.env.PORT}`);
 });

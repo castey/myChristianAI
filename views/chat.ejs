@@ -4,7 +4,7 @@
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
     <link rel="shortcut icon" href="jesusemoji.png" type="image/x-icon">
-    <title>Chat</title>
+    <title>Chat - My Christian AI</title>
     <link rel="stylesheet" href="style.css">
     <script src="/socket.io/socket.io.js"></script>
 
@@ -17,15 +17,15 @@
             <div id="top-bar-contain">
                 <div class="logoContain">
 
-                    <a class="logoText" href="https://mychristianai.com/"><img class="logo" src="/jesusemoji.png"></a>
-                    <a class="logoText" href="https://mychristianai.com/">My Christian AI</a>
+                    <a class="logoText" href="/"><img class="logo" src="/jesusemoji.png"></a>
+                    <a class="logoText" href="/">My Christian AI</a>
 
                 </div>
 
                 <!-- Dropdown for Christian Denominations -->
                 <div id="selectMenuDiv">
 
-                    <a href="/logout" class="logout-button">Logout</a>
+                    <a href="/settings" class="settings-button">⚙</a>
 
                     <div class="user-profile">
                         <% if (user) { %>
@@ -118,7 +118,6 @@
 
         document.addEventListener("DOMContentLoaded", () => {
 
-            document.getElementById("denomination").value = "christian";
             document.getElementById('messageInput').focus();
 
             let invisibleText = "---";
@@ -153,6 +152,11 @@
                 document.getElementById('messageInput').value = '';
                 return false;
             });
+
+            socket.on("favDenom", (msg => {
+
+                document.getElementById("denomination").value = msg;
+            }))
 
             socket.on('chat message', (msg) => {
                 console.log(msg);

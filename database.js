@@ -9,6 +9,31 @@ const pool = mysql.createPool({
     database: process.env.DATABASE_NAME
 });
 
+async function getUserData(userID, columnName) {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                return reject(err);
+            }
+
+            const query = `SELECT ?? FROM users WHERE userID = ?`;
+            connection.query(query, [columnName, userID], (error, results) => {
+                connection.release(); // Always release the connection back to the pool
+                if (error) {
+                    return reject(error);
+                }
+
+                if (results.length === 0) {
+                    return reject(new Error('User not found'));
+                }
+
+                const data = results[0][columnName];
+                resolve(data);
+            });
+        });
+    });
+}
+
 async function getSummary(userID) {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
@@ -34,6 +59,12 @@ async function getSummary(userID) {
 }
 
 function updateUserCredit(userID, creditToAdd, summary = null) {
+    console.log(creditToAdd)
+    if (isNaN(creditToAdd)) { // Use isNaN to check for NaN
+        console.error("Invalid input: creditToAdd is not a number.");
+        return 0;
+    }
+
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -130,9 +161,90 @@ async function getUserOrCreate(userData) {
     });
 }
 
+async function updateUserData(userID, columnName, newValue) {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                return reject(err);
+            }
+
+            const query = `UPDATE users SET ?? = ? WHERE userID = ?`;
+            connection.query(query, [columnName, newValue, userID], (error, results) => {
+                connection.release(); // Always release the connection back to the pool
+                if (error) {
+                    return reject(error);
+                }
+
+                if (results.affectedRows === 0) {
+                    return reject(new Error('User not found or no change made'));
+                }
+
+                resolve(`User data updated successfully`);
+            });
+        });
+    });
+}
+
+async function deleteUser(userID) {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                return reject(err);
+            }
+
+            const query = `DELETE FROM users WHERE userID = ?`;
+            connection.query(query, [userID], (error, results) => {
+                connection.release(); // Always release the connection back to the pool
+                if (error) {
+                    return reject(error);
+                }
+
+                if (results.affectedRows === 0) {
+                    return reject(new Error('User not found or no user deleted'));
+                }
+
+                resolve(`User deleted successfully`);
+            });
+        });
+    });
+}
+
+async function getAllUserData(userID) {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                return reject(err);
+            }
+
+            const query = `SELECT * FROM users WHERE userID = ?`;
+            connection.query(query, [userID], (error, results) => {
+                connection.release(); // Always release the connection back to the pool
+                if (error) {
+                    return reject(error);
+                }
+
+                if (results.length === 0) {
+                    return reject(new Error('User not found'));
+                }
+
+                // Assuming that userID is unique and can only return one row
+                const userData = results[0];
+
+                resolve(userData);
+            });
+        });
+    });
+}
+
+
+
 
 module.exports = {
     getUserOrCreate,
     updateUserCredit,
-    getSummary
+    getSummary,
+    getUserData,
+    updateUserData,
+    deleteUser,
+    getAllUserData
 }

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="shortcut icon" href="jesusemoji.png" type="image/x-icon">
+    <title>Settings - My Christian AI</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("favoriteDenomination").value = "<%= user.favorite %>";
+        });
+
+        function confirmDelete() {
+            var confirmAction = confirm("Are you sure you want to delete your data?");
+            if (confirmAction) {
+                document.getElementById("deleteForm").submit();
+            } else {
+                console.log("Delete action cancelled.");
+            }
+        }
+
+
+    </script>
+    <title>Login</title>
+    <style>
+        body {
+            text-align: left;
+            padding-top: 50px;
+            margin: auto;
+            display: flex;
+
+        }
+
+        .login-button {
+            margin: auto;
+            width: 400px;
+            background-color: #4267B2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .loginBox {
+            position: relative;
+            margin: auto;
+            width: 80%;
+            background-color: rgb(73, 0, 0);
+            border: rgb(24, 24, 24) solid 2px;
+            padding: 40px;
+            max-width: 1111px;
+            border-radius: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo {
+            height: 200px;
+            width: 200px;
+        }
+
+        .selectMenu {
+            color: #f2f2f2;
+            background-color: rgb(36, 0, 0);
+            width: 132px;
+            border-radius: 10px;
+            height: 44px;
+            margin-left: 100px;
+            float: right;
+        }
+
+        .row {
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .form {
+            flex-direction: column;
+        }
+
+
+        .pplink {
+            color: white;
+            text-decoration: underline;
+            width: 100%;
+            font-size: 12px;
+            text-align: center;
+            margin-right: 16px;
+        }
+
+        .pplink:hover {
+            color: grey;
+            text-decoration: underline;
+        }
+        .pplinkdiv{
+            margin-top: 14px;
+        }
+        .backlink{
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            color: white;
+        }
+        .backlink:hover{
+            color: gray;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loginBox">
+
+        <div class="pplinkdiv"><a href="/" class="backlink">←back</a></div>
+
+        <a class="logoText" href="/"><img class="logo" src="/jesusemoji.png"></a>
+        <h2>Settings:</h2>
+
+        <!-- Settings Form -->
+        <form action="/settings-submit" method="post" class="form">
+            <!-- Favorite Denomination Select Menu -->
+            <div class="row">
+                <label for="favoriteDenomination">Default Denomination:</label>
+                <select name="favoriteDenomination" id="favoriteDenomination" class="selectMenu">
+                    <option value="christian">Christian</option>
+                    <option value="Pre-Nicene">Early Christian (Pre-Nicene)</option>
+                    <option value="catholic">Catholic</option>
+                    <option value="orthodox">Orthodox</option>
+                    <option value="anglican">Anglican</option>
+                    <option value="lutheran">Lutheran</option>
+                    <option value="calvinist">Calvinist</option>
+                    <option value="anabaptist">Anabaptist</option>
+                    <option value="baptist">Baptist</option>
+                    <option value="methodist">Methodist</option>
+                    <option value="congregational">Congregational</option>
+                    <option value="quaker">Quaker</option>
+                    <option value="episcopal">Episcopal</option>
+                    <option value="pentecostal">Pentecostal</option>
+                    <option value="adventist">Seventh-day Adventist</option>
+                    <option value="nazarene">Church of the Nazarene</option>
+                    <option value="charismatic">Charismatic</option>
+                    <option value="mormon">Mormon</option>
+                    <option value="jehovahs witness">Jehovah's Witness</option>
+                    <option value="secular">Secular</option>
+                </select>
+            </div>
+            <div class="row">
+                <!-- Email Field -->
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="selectMenu" value="<%= user.email %>"><br>
+            </div>
+            <div class="row">
+                <!-- Submit Button -->
+                <input type="submit" value="Submit" class="login-button"><br>
+            </div>
+        </form>
+
+        <!-- Download Data Form/Button -->
+        <form action="/download-data" method="post">
+            <input type="submit" value="Download Data" class="login-button">
+        </form>
+
+        <!-- Delete Data Form/Button -->
+        <form action="/delete-data" method="post" id="deleteForm">
+            <input type="button" value="Delete Data" class="login-button" onclick="confirmDelete()">
+        </form>
+
+        <a href="/logout" class="logout-button">Log out</a>
+
+        <div class="pplinkdiv"><a href="/privacy-policy" class="pplink">Privacy Policy</a></div>
+        <div class="pplinkdiv"><a href="/privacy-policy" class="pplink">Terms of Service</a></div>
+
+    </div>
+</body>
+
+</html>
