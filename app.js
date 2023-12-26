@@ -106,22 +106,6 @@ app.get('/auth/facebook/callback',
         res.redirect('/');
     });
 
-// Data Deletion Callback Endpoint
-app.post('/data-deletion', async (req, res) => {
-    try {
-        const userId = req.body.userId; // Facebook sends the user ID for deletion
-        // TODO: Add logic to delete user data from your database/storage
-        // For example, deleteUser(userId);
-
-        // Respond with a confirmation code or message
-        res.status(200).json({ success: true, message: 'User data deleted successfully.' });
-
-    } catch (error) {
-        console.error('Data Deletion Error:', error);
-        res.status(500).json({ success: false, message: 'Internal Server Error' });
-    }
-});
-
 // ToS endpoint
 app.get("/terms-of-service", (req, res) => {
     res.render('terms')
@@ -133,7 +117,7 @@ app.get("/privacy-policy", (req, res) => {
 });
 
 app.post("delete-data", isAuthenticated, async (req, res) => {
-    database.deleteUser(req.user.id)
+    await database.deleteUser(req.user.id)
     return res.redirect('/logout');
 })
 
@@ -141,10 +125,10 @@ app.get("/contact", (req, res) => {
     res.render('contact', {success: "Contact"})
 })
 
-app.post("/contact-submit", (req, res) => {
+app.post("/contact-submit", async (req, res) => {
     if (req && req.body && req.body.message) {
         console.log(req.body.message)
-        database.saveContactMessage(req.body.message + "\nsent by: " + req.body.email)
+        await database.saveContactMessage(req.body.message + "\nsent by: " + req.body.email)
         res.render('contact', {success: "Message Sent!"})
         //send email
     }
