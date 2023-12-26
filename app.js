@@ -6,7 +6,6 @@ const bodyParser = require('body-parser');
 const chat = require('./chatbot.js')
 require('dotenv').config();
 const database = require("./database.js");
-const { emit } = require('process');
 
 const app = express();
 const server = require('http').createServer(app);
@@ -126,11 +125,21 @@ app.get("/privacy-policy", (req, res) => {
     res.render('policy')
 });
 
-app.post("delete-data", isAuthenticated, async (req, res)=>{
+app.post("delete-data", isAuthenticated, async (req, res) => {
     database.deleteUser(req.user.id)
-
     return res.redirect('/logout');
+})
 
+app.get("/contact", (req, res) => {
+    res.render('contact', {success: "Contact"})
+})
+
+app.post("/contact-submit", (req, res) => {
+    if (req && req.body && req.body.message) {
+        console.log(req.body.message)
+        res.render('contact', {success: "Message Sent!"})
+        //send email
+    }
 })
 
 app.post("/download-data", isAuthenticated, async (req, res) => {

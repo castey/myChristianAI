@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="shortcut icon" href="jesusemoji.png" type="image/x-icon">
+    <title>Settings - My Christian AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <script>
+
+    </script>
+    <title>Login</title>
+    <style>
+        body {
+            text-align: left;
+            padding-top: 50px;
+            margin: auto;
+            display: flex;
+
+        }
+
+        .login-button {
+            margin: auto;
+            width: 400px;
+            background-color: #4267B2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .loginBox {
+            position: relative;
+            margin: auto;
+            width: 80%;
+            background-color: rgb(73, 0, 0);
+            border: rgb(24, 24, 24) solid 2px;
+            padding: 40px;
+            max-width: 1111px;
+            border-radius: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo {
+            height: 200px;
+            width: 200px;
+        }
+
+        .selectMenu {
+            color: #f2f2f2;
+            background-color: rgb(36, 0, 0);
+            width: 132px;
+            border-radius: 10px;
+            height: 44px;
+            margin-left: 100px;
+            float: right;
+        }
+
+        .row {
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .form {
+            flex-direction: column;
+        }
+
+
+        .pplink {
+            color: white;
+            text-decoration: underline;
+            width: 100%;
+            font-size: 12px;
+            text-align: center;
+            margin-right: 16px;
+        }
+
+        .pplink:hover {
+            color: grey;
+            text-decoration: underline;
+        }
+
+        .pplinkdiv {
+            margin-top: 14px;
+        }
+
+        .backlink {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            color: white;
+        }
+
+        .backlink:hover {
+            color: gray;
+        }
+
+        .selectMenu {
+            width: 100%;
+            height: 200px;
+            margin: auto;
+            resize: none;
+        }
+        #email{
+            height: 40px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loginBox">
+
+        <div class="pplinkdiv"><a href="/" class="backlink">←home</a></div>
+
+        <a class="logoText" href="/"><img class="logo" src="/jesusemoji.png"></a>
+        <h2>
+            <% if (success) { %>
+                <%= success %>
+                <% } else { %>
+                    <p>Error!</p>
+                    <% } %>
+        </h2>
+
+        <!-- Settings Form -->
+        <form action="/contact-submit" method="post" class="form">
+            <!-- Favorite Denomination Select Menu -->
+            <div class="row">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="selectMenu"><br>
+                <!-- Contact Field -->
+                <label for="message">Message:</label>
+
+                <textarea id="message" name="message" class="selectMenu" rows="4" cols="50"></textarea><br>
+            </div>
+            <div class="row">
+                <!-- Submit Button -->
+                <input type="submit" value="Submit" class="login-button"><br>
+            </div>
+        </form>
+
+    </div>
+</body>
+
+</html>
