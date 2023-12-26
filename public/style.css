@@ -61,6 +61,12 @@ body {
     width: 90%;
 }
 
+@media screen and (max-width: 768px) {
+    .bottom-bar {
+        margin-bottom: 40px;
+    }
+}
+
 .msgContain {
     width: 100%;
     display: block;
