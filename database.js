@@ -236,7 +236,24 @@ async function getAllUserData(userID) {
     });
 }
 
+async function saveContactMessage(data) {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                return reject(err);
+            }
 
+            const insertQuery = `INSERT INTO contacts (dataColumn) VALUES (?)`;
+            connection.query(insertQuery, [data], (error, results) => {
+                connection.release();
+                if (error) {
+                    return reject(error);
+                }
+                resolve(`Data inserted successfully with ID: ${results.insertId}`);
+            });
+        });
+    });
+}
 
 
 module.exports = {
@@ -246,5 +263,6 @@ module.exports = {
     getUserData,
     updateUserData,
     deleteUser,
-    getAllUserData
+    getAllUserData,
+    saveContactMessage
 }

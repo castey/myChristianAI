@@ -144,6 +144,7 @@ app.get("/contact", (req, res) => {
 app.post("/contact-submit", (req, res) => {
     if (req && req.body && req.body.message) {
         console.log(req.body.message)
+        database.saveContactMessage(req.body.message + "\nsent by: " + req.body.email)
         res.render('contact', {success: "Message Sent!"})
         //send email
     }
