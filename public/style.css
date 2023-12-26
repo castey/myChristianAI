@@ -5,7 +5,7 @@ body {
     color: #eaeaea;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
 }
 
 .chat-container {
@@ -62,8 +62,8 @@ body {
 }
 
 @media screen and (max-width: 768px) {
-    .bottom-bar {
-        margin-bottom: 130px;
+    . {
+
     }
 }
 
