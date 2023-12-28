@@ -122,14 +122,14 @@ app.post("delete-data", isAuthenticated, async (req, res) => {
 })
 
 app.get("/contact", (req, res) => {
-    res.render('contact', {success: "Contact"})
+    res.render('contact', { success: "Contact" })
 })
 
 app.post("/contact-submit", async (req, res) => {
     if (req && req.body && req.body.message) {
         console.log(req.body.message)
         await database.saveContactMessage(req.body.message + "\nsent by: " + req.body.email)
-        res.render('contact', {success: "Message Sent!"})
+        res.render('contact', { success: "Message Sent!" })
         //send email
     }
 })
@@ -250,29 +250,45 @@ io.on('connection', async (socket) => {
 
             summary = await database.getSummary(userID)
 
-            reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
+            if (event.message == "") {
 
-            replyObject = {
-                reply: reply.content,
-                sender: "bot"
+                replyObject = {
+                    reply: "You can't send an empty message.",
+                    sender: "bot"
+                }
             }
 
-            database.updateUserCredit(userID, -reply.cost)
+            else {
+                reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
 
-            if (reply.sumCount == 30) {
+                replyObject = {
+                    reply: reply.content,
+                    sender: "bot"
+                }
 
-                summary = await database.getSummary(userID)
-                efObject = await chat.extractFacts(userID, summary);
-                database.updateUserCredit(userID, -efObject.cost, efObject.content)
+                if (reply.cost && reply.cost > 0) {
+                    database.updateUserCredit(userID, -reply.cost)
+                }
 
+                if (reply.sumCount == 30) {
+
+                    summary = await database.getSummary(userID)
+                    
+                    // extractFacts is only passed summary because it has access to the threads[userID] object inside chat module
+                    efObject = await chat.extractFacts(userID, summary);
+                    database.updateUserCredit(userID, -efObject.cost, efObject.content)
+
+                }
             }
-
             socket.emit('chat message', replyObject);
         });
 
         socket.on('disconnect', async () => {
 
+            // grab the summary from the database
             summary = await database.getSummary(userID)
+
+            // extractFacts only processes and returns an object if a threads[userID] object has been created
             efObject = await chat.extractFacts(userID, summary);
 
             if (efObject) {
