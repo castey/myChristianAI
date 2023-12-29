@@ -56,7 +56,7 @@
                         <option value="charismatic">Charismatic</option>
                         <option value="mormon">Mormon</option>
                         <option value="jehovahs witness">Jehovah's Witness</option>
-                        <option value="secular">Secular</option>
+                        <option id = "sec" value="secular">Secular</option>
                     </select>
 
                     <!-- Dropdown for Bible Characters -->
@@ -99,7 +99,7 @@
 
     <script>
         document.getElementById('denomination').addEventListener('change', function () {
-            let px = document.getElementById("character");
+            let px = document.getElementById("sec");
 
             if (this.value == "secular") {
                 px.innerText = "Scholar";
