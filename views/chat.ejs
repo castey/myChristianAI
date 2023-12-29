@@ -102,10 +102,10 @@
             let px = document.getElementById("sec");
 
             if (this.value == "secular") {
-                px.innerText = "Scholar";
+                px.options[0].text = "Scholar";
             }
             else {
-                px.innerText = "Minister";
+                px.options[0].text = "Minister";
             }
         });
         if (window.location.hash && window.location.hash == '#_=_') {
