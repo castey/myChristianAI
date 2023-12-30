@@ -236,6 +236,8 @@ io.on('connection', async (socket) => {
 
         favoriteDenom = await database.getUserData(userID, "favorite");
 
+        if(favoriteDenom == "" || !favoriteDenom) favoriteDenom = "christian";
+        
         socket.emit("favDenom", favoriteDenom);
 
         console.log('Authenticated user connected');
