@@ -214,13 +214,29 @@ app.get("/settings", isAuthenticated, async (req, res) => {
 // Chat interface for authenticated users
 app.get('/', isAuthenticated, async (req, res) => {
 
-    const userObject = {
-        id: req.user.id,
-        first_name: req.user.name.givenName,
-        last_name: req.user.name.familyName,
-        email: req.user.emails[0].value
-    };
 
+    console.log(req.user)
+
+    if (req.user.emails) {
+
+        const userObject = {
+            id: req.user.id,
+            first_name: req.user.name.givenName,
+            last_name: req.user.name.familyName,
+            email: req.user.emails[0].value
+        };
+
+    }
+
+    else {
+
+        const userObject = {
+            id: req.user.id,
+            first_name: req.user.name.givenName,
+            last_name: req.user.name.familyName,
+            email: "none found"
+        };
+    }
     // pass user object to DB for creation/login, returns 
     const databaseObject = await database.getUserOrCreate(userObject);
 
@@ -236,7 +252,7 @@ io.on('connection', async (socket) => {
 
         favoriteDenom = await database.getUserData(userID, "favorite");
 
-        if(favoriteDenom == "" || !favoriteDenom) favoriteDenom = "christian";
+        if (favoriteDenom == "" || !favoriteDenom) favoriteDenom = "christian";
 
         socket.emit("favDenom", favoriteDenom);
 
@@ -275,7 +291,7 @@ io.on('connection', async (socket) => {
                 if (reply.sumCount == 30) {
 
                     summary = await database.getSummary(userID)
-                    
+
                     // extractFacts is only passed summary because it has access to the threads[userID] object inside chat module
                     efObject = await chat.extractFacts(userID, summary);
                     database.updateUserCredit(userID, -efObject.cost, efObject.content)
