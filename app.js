@@ -214,12 +214,12 @@ app.get("/settings", isAuthenticated, async (req, res) => {
 // Chat interface for authenticated users
 app.get('/', isAuthenticated, async (req, res) => {
 
+    let userObject
 
     console.log(req.user)
 
     if (req.user.emails) {
-
-        const userObject = {
+        userObject = {
             id: req.user.id,
             first_name: req.user.name.givenName,
             last_name: req.user.name.familyName,
@@ -230,7 +230,7 @@ app.get('/', isAuthenticated, async (req, res) => {
 
     else {
 
-        const userObject = {
+        userObject = {
             id: req.user.id,
             first_name: req.user.name.givenName,
             last_name: req.user.name.familyName,
