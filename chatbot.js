@@ -130,6 +130,7 @@ async function smartBot(message, px, denomination, userID, summary) {
 
     try {
         let reply = await openai.chat.completions.create({
+            organization:"org-RUs34xR3SdU8QleQrcd6OWrq",
             model: "gpt-3.5-turbo-1106",
             messages: promptArray,
             max_tokens: 300
@@ -193,6 +194,7 @@ async function extractFacts(userID, summary) {
         try {
 
             reply = await openai.chat.completions.create({
+                organization:"org-RUs34xR3SdU8QleQrcd6OWrq",
                 model: "gpt-3.5-turbo-1106",
                 messages: [
                     { role: "system", content: `You are the long term memory feature of an AI chat bot. your purpose is to take the information you already know about a person and update their profile with any new information you might be given that would enhance your memory of them. Be selective, you don't have to memorize everything but try to build a good psychological profile. Change what's in your memory if needed but try to remember key details. Try to keep it very short, discarding information if needed` },
