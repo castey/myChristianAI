@@ -116,7 +116,7 @@ app.get("/privacy-policy", (req, res) => {
     res.render('policy')
 });
 
-app.post("delete-data", isAuthenticated, async (req, res) => {
+app.post("/delete-data", isAuthenticated, async (req, res) => {
     await database.deleteUser(req.user.id)
     return res.redirect('/logout');
 })
@@ -237,7 +237,7 @@ io.on('connection', async (socket) => {
         favoriteDenom = await database.getUserData(userID, "favorite");
 
         if(favoriteDenom == "" || !favoriteDenom) favoriteDenom = "christian";
-        
+
         socket.emit("favDenom", favoriteDenom);
 
         console.log('Authenticated user connected');
