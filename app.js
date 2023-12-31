@@ -98,8 +98,13 @@ app.get('/login', isNotAuthenticated, (req, res) => {
 
 });
 
+function logFacebookRedirect(req, res, next) {
+    console.log("Visitor directed to Facebook Login");
+    next(); // Proceed to the next middleware
+}
+
 // Facebook authentication routes
-app.get('/auth/facebook', isNotAuthenticated, passport.authenticate('facebook', { scope: ['email'] }));
+app.get('/auth/facebook', isNotAuthenticated, logFacebookRedirect, passport.authenticate('facebook', { scope: ['email'] }));
 
 app.get('/auth/facebook/callback',
     passport.authenticate('facebook', { failureRedirect: '/login' }),
