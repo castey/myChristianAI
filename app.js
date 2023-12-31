@@ -199,7 +199,6 @@ app.get("/settings", isAuthenticated, async (req, res) => {
         favorite: favorite
     }
 
-    console.log(databaseObject)
     res.render('settings', { user: databaseObject })
 
 })
@@ -208,8 +207,6 @@ app.get("/settings", isAuthenticated, async (req, res) => {
 app.get('/', isAuthenticated, async (req, res) => {
 
     let userObject
-
-    console.log(req.user)
 
     if (req.user.emails) {
         userObject = {
