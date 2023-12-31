@@ -243,7 +243,7 @@ io.on('connection', async (socket) => {
     // Check if the user is authenticated
     if (socket.request.session && socket.request.session.passport && socket.request.session.passport.user) {
 
-        connections[userID] = socket.request.session.passport.user.id;
+        connections[socket.request.session.passport.user.id] = socket.request.session.passport.user.id;
 
         favoriteDenom = await database.getUserData(connections[userID], "favorite");
 
@@ -308,8 +308,11 @@ io.on('connection', async (socket) => {
 
                 database.updateUserCredit(connections[userID], -efObject.cost, efObject.content)
                 chat.clearThread(connections[userID]);
+                
+                console.log('User disconnected: ' + connections[userID]);
+
+                delete connections[socket.request.session.passport.user.id];
             }
-            console.log('User disconnected: ' + connections[userID]);
         });
     } else {
         console.log('Unauthenticated user attempted to connect');
