@@ -237,13 +237,13 @@ app.get('/', isAuthenticated, async (req, res) => {
 });
 
 // Socket.IO for real-time chat
-socket.on('connection', async (socket) => {
+io.on('connection', async (socket) => {
     // Check if the user is authenticated
     if (socket.request.session && socket.request.session.passport && socket.request.session.passport.user) {
 
-        userID = socket.request.session.passport.user.id;
+        let userID = socket.request.session.passport.user.id;
 
-        favoriteDenom = await database.getUserData(userID, "favorite");
+        let favoriteDenom = await database.getUserData(userID, "favorite");
 
         if (favoriteDenom == "" || !favoriteDenom) favoriteDenom = "christian";
 
@@ -253,26 +253,26 @@ socket.on('connection', async (socket) => {
 
         socket.on('chat message', async (event) => {
 
-            replyObject = {
+            let replyObject = {
                 reply: event.message,
                 sender: "client"
             }
             socket.emit('chat message', replyObject);
 
-            summary = await database.getSummary(userID)
+            let summary = await database.getSummary(userID)
 
             if (event.message == "") {
 
-                replyObject = {
+                let replyObject = {
                     reply: "You can't send an empty message.",
                     sender: "bot"
                 }
             }
 
             else {
-                reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
+                let reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
 
-                replyObject = {
+                let replyObject = {
                     reply: reply.content,
                     sender: "bot"
                 }
@@ -297,10 +297,10 @@ socket.on('connection', async (socket) => {
         socket.on('disconnect', async () => {
 
             // grab the summary from the database
-            summary = await database.getSummary(userID)
+            let summary = await database.getSummary(userID)
 
             // extractFacts only processes and returns an object if a threads[userID] object has been created
-            efObject = await chat.extractFacts(userID, summary);
+            let efObject = await chat.extractFacts(userID, summary);
 
             if (efObject) {
 
