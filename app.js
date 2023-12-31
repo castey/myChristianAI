@@ -241,9 +241,9 @@ io.on('connection', async (socket) => {
     // Check if the user is authenticated
     if (socket.request.session && socket.request.session.passport && socket.request.session.passport.user) {
 
-        let userID = socket.request.session.passport.user.id;
+        userID = socket.request.session.passport.user.id;
 
-        let favoriteDenom = await database.getUserData(userID, "favorite");
+        favoriteDenom = await database.getUserData(userID, "favorite");
 
         if (favoriteDenom == "" || !favoriteDenom) favoriteDenom = "christian";
 
@@ -253,26 +253,26 @@ io.on('connection', async (socket) => {
 
         socket.on('chat message', async (event) => {
 
-            let replyObject = {
+            replyObject = {
                 reply: event.message,
                 sender: "client"
             }
             socket.emit('chat message', replyObject);
 
-            let summary = await database.getSummary(userID)
+            summary = await database.getSummary(userID)
 
             if (event.message == "") {
 
-                let replyObject = {
+                replyObject = {
                     reply: "You can't send an empty message.",
                     sender: "bot"
                 }
             }
 
             else {
-                let reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
+                reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
 
-                let replyObject = {
+                replyObject = {
                     reply: reply.content,
                     sender: "bot"
                 }
@@ -297,10 +297,10 @@ io.on('connection', async (socket) => {
         socket.on('disconnect', async () => {
 
             // grab the summary from the database
-            let summary = await database.getSummary(userID)
+            summary = await database.getSummary(userID)
 
             // extractFacts only processes and returns an object if a threads[userID] object has been created
-            let efObject = await chat.extractFacts(userID, summary);
+            efObject = await chat.extractFacts(userID, summary);
 
             if (efObject) {
 
