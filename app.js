@@ -246,7 +246,7 @@ io.on('connection', async (socket) => {
 
         socket.emit("favDenom", favoriteDenom);
 
-        console.log('Authenticated user connected' + userID);
+        console.log('Authenticated user connected: ' + userID);
 
         socket.on('chat message', async (event) => {
 
