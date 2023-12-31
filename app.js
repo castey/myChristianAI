@@ -129,7 +129,6 @@ app.get("/contact", (req, res) => {
 
 app.post("/contact-submit", async (req, res) => {
     if (req && req.body && req.body.message) {
-        console.log(req.body.message)
         await database.saveContactMessage(req.body.message + "\nsent by: " + req.body.email)
         res.render('contact', { success: "Message Sent!" })
         //send email
@@ -201,7 +200,6 @@ app.get("/settings", isAuthenticated, async (req, res) => {
         favorite: favorite
     }
 
-    console.log(databaseObject)
     res.render('settings', { user: databaseObject })
 
 })
@@ -210,8 +208,6 @@ app.get("/settings", isAuthenticated, async (req, res) => {
 app.get('/', isAuthenticated, async (req, res) => {
 
     let userObject
-
-    console.log(req.user)
 
     if (req.user.emails) {
         userObject = {
@@ -243,17 +239,17 @@ io.on('connection', async (socket) => {
     // Check if the user is authenticated
     if (socket.request.session && socket.request.session.passport && socket.request.session.passport.user) {
 
-        userID = socket.request.session.passport.user.id;
-        
-        connections[userID] = socket.request.session.passport.user.id;
+        let userID = socket.request.session.passport.user.id;
 
-        favoriteDenom = await database.getUserData(connections[userID], "favorite");
+        connections[userID].id = socket.request.session.passport.user.id;
 
-        if (favoriteDenom == "" || !favoriteDenom) favoriteDenom = "christian";
+        connections[userID].favoriteDenom = await database.getUserData(connections[userID], "favorite");
 
-        socket.emit("favDenom", favoriteDenom);
+        if (connections[userID].favoriteDenom == "" || !connections[userID].favoriteDenom) connections[userID].favoriteDenom = "christian";
 
-        console.log('Authenticated user connected');
+        socket.emit("favDenom", connections[userID].favoriteDenom);
+
+        console.log('Authenticated user connected' + connections[userID].id);
 
         socket.on('chat message', async (event) => {
 
@@ -263,7 +259,7 @@ io.on('connection', async (socket) => {
             }
             socket.emit('chat message', replyObject);
 
-            summary = await database.getSummary(connections[userID])
+            summary = await database.getSummary(connections[userID].id)
 
             if (event.message == "") {
 
@@ -274,7 +270,7 @@ io.on('connection', async (socket) => {
             }
 
             else {
-                reply = await chat.smartBot(event.message, event.character, event.denomination, connections[userID], summary);
+                reply = await chat.smartBot(event.message, event.character, event.denomination, connections[userID].id, summary);
 
                 replyObject = {
                     reply: reply.content,
@@ -282,16 +278,16 @@ io.on('connection', async (socket) => {
                 }
 
                 if (reply.cost && reply.cost > 0) {
-                    database.updateUserCredit(connections[userID], -reply.cost)
+                    database.updateUserCredit(connections[userID].id, -reply.cost)
                 }
 
                 if (reply.sumCount == 30) {
 
-                    summary = await database.getSummary(connections[userID])
+                    summary = await database.getSummary(connections[userID].id)
 
                     // extractFacts is only passed summary because it has access to the threads[connections[userID]] object inside chat module
-                    efObject = await chat.extractFacts(connections[userID], summary);
-                    database.updateUserCredit(connections[userID], -efObject.cost, efObject.content)
+                    efObject = await chat.extractFacts(connections[userID].id, summary);
+                    database.updateUserCredit(connections[userID].id, -efObject.cost, efObject.content)
 
                 }
             }
@@ -301,19 +297,19 @@ io.on('connection', async (socket) => {
         socket.on('disconnect', async () => {
 
             // grab the summary from the database
-            summary = await database.getSummary(connections[userID])
+            summary = await database.getSummary(connections[userID].id)
 
             // extractFacts only processes and returns an object if a threads[connections[userID]] object has been created
-            efObject = await chat.extractFacts(connections[userID], summary);
+            efObject = await chat.extractFacts(connections[userID].id, summary);
 
             if (efObject) {
 
-                database.updateUserCredit(connections[userID], -efObject.cost, efObject.content)
-                chat.clearThread(connections[userID]);
+                database.updateUserCredit(connections[userID].id, -efObject.cost, efObject.content)
+                chat.clearThread(connections[userID].id);
                 
-                console.log('User disconnected: ' + connections[userID]);
+                console.log('User disconnected: ' + connections[userID].id);
 
-                delete connections[socket.request.session.passport.user.id];
+                delete connections[userID].id;
             }
         });
     } else {
