@@ -243,7 +243,9 @@ io.on('connection', async (socket) => {
     // Check if the user is authenticated
     if (socket.request.session && socket.request.session.passport && socket.request.session.passport.user) {
 
-        connections[socket.request.session.passport.user.id] = socket.request.session.passport.user.id;
+        userID = socket.request.session.passport.user.id;
+        
+        connections[userID] = socket.request.session.passport.user.id;
 
         favoriteDenom = await database.getUserData(connections[userID], "favorite");
 
