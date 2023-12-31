@@ -224,7 +224,8 @@ async function getAllUserData(userID) {
                 }
 
                 if (results.length === 0) {
-                    return reject(new Error('User not found'));
+                    return reject(new Error('User not found: ' + userID)); 
+
                 }
 
                 // Assuming that userID is unique and can only return one row
