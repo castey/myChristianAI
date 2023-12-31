@@ -59,7 +59,6 @@ async function getSummary(userID) {
 }
 
 function updateUserCredit(userID, creditToAdd, summary = null) {
-    console.log(creditToAdd)
     if (isNaN(creditToAdd)) { // Use isNaN to check for NaN
         console.error("Invalid input: creditToAdd is not a number.");
         return 0;

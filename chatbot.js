@@ -225,7 +225,7 @@ async function extractFacts(userID, summary) {
 
         }
         catch (e) {
-            console.log(e)
+            console.error(e)
         }
     }
 }
