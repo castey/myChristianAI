@@ -93,6 +93,7 @@ app.get('/logout', (req, res) => {
 
 // Login Route
 app.get('/login', isNotAuthenticated, (req, res) => {
+    console.log("Login page accessed!")
     res.render('login');
 
 });

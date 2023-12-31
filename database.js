@@ -145,6 +145,8 @@ async function getUserOrCreate(userData) {
                     favorite: '',
                     credit: 0
                 };
+
+                console.log(`New User: ${newUser.first_name} ${newUser.last_name} ${newUser.email}`)
                 connection.query('INSERT INTO users SET ?', newUser, (error, results) => {
                     connection.release(); // Release the connection back to the pool
                     if (error) {
