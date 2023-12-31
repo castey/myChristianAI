@@ -11,8 +11,6 @@ const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 
-let connections = {}
-
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -129,6 +127,7 @@ app.get("/contact", (req, res) => {
 
 app.post("/contact-submit", async (req, res) => {
     if (req && req.body && req.body.message) {
+        console.log(req.body.message)
         await database.saveContactMessage(req.body.message + "\nsent by: " + req.body.email)
         res.render('contact', { success: "Message Sent!" })
         //send email
@@ -191,7 +190,7 @@ app.post("/settings-submit", isAuthenticated, async (req, res) => {
 
 // settings endpoint
 app.get("/settings", isAuthenticated, async (req, res) => {
-
+    
     email = await database.getUserData(req.user.id, "email");
     favorite = await database.getUserData(req.user.id, "favorite");
 
@@ -200,6 +199,7 @@ app.get("/settings", isAuthenticated, async (req, res) => {
         favorite: favorite
     }
 
+    console.log(databaseObject)
     res.render('settings', { user: databaseObject })
 
 })
@@ -208,6 +208,8 @@ app.get("/settings", isAuthenticated, async (req, res) => {
 app.get('/', isAuthenticated, async (req, res) => {
 
     let userObject
+
+    console.log(req.user)
 
     if (req.user.emails) {
         userObject = {
@@ -241,15 +243,13 @@ io.on('connection', async (socket) => {
 
         let userID = socket.request.session.passport.user.id;
 
-        connections[userID].id = socket.request.session.passport.user.id;
+        favoriteDenom = await database.getUserData(userID, "favorite");
 
-        connections[userID].favoriteDenom = await database.getUserData(connections[userID], "favorite");
+        if (favoriteDenom == "" || !favoriteDenom) favoriteDenom = "christian";
 
-        if (connections[userID].favoriteDenom == "" || !connections[userID].favoriteDenom) connections[userID].favoriteDenom = "christian";
+        socket.emit("favDenom", favoriteDenom);
 
-        socket.emit("favDenom", connections[userID].favoriteDenom);
-
-        console.log('Authenticated user connected' + connections[userID].id);
+        console.log('Authenticated user connected');
 
         socket.on('chat message', async (event) => {
 
@@ -259,7 +259,7 @@ io.on('connection', async (socket) => {
             }
             socket.emit('chat message', replyObject);
 
-            summary = await database.getSummary(connections[userID].id)
+            summary = await database.getSummary(userID)
 
             if (event.message == "") {
 
@@ -270,7 +270,7 @@ io.on('connection', async (socket) => {
             }
 
             else {
-                reply = await chat.smartBot(event.message, event.character, event.denomination, connections[userID].id, summary);
+                reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
 
                 replyObject = {
                     reply: reply.content,
@@ -278,16 +278,16 @@ io.on('connection', async (socket) => {
                 }
 
                 if (reply.cost && reply.cost > 0) {
-                    database.updateUserCredit(connections[userID].id, -reply.cost)
+                    database.updateUserCredit(userID, -reply.cost)
                 }
 
                 if (reply.sumCount == 30) {
 
-                    summary = await database.getSummary(connections[userID].id)
+                    summary = await database.getSummary(userID)
 
-                    // extractFacts is only passed summary because it has access to the threads[connections[userID]] object inside chat module
-                    efObject = await chat.extractFacts(connections[userID].id, summary);
-                    database.updateUserCredit(connections[userID].id, -efObject.cost, efObject.content)
+                    // extractFacts is only passed summary because it has access to the threads[userID] object inside chat module
+                    efObject = await chat.extractFacts(userID, summary);
+                    database.updateUserCredit(userID, -efObject.cost, efObject.content)
 
                 }
             }
@@ -297,20 +297,17 @@ io.on('connection', async (socket) => {
         socket.on('disconnect', async () => {
 
             // grab the summary from the database
-            summary = await database.getSummary(connections[userID].id)
+            summary = await database.getSummary(userID)
 
-            // extractFacts only processes and returns an object if a threads[connections[userID]] object has been created
-            efObject = await chat.extractFacts(connections[userID].id, summary);
+            // extractFacts only processes and returns an object if a threads[userID] object has been created
+            efObject = await chat.extractFacts(userID, summary);
 
             if (efObject) {
 
-                database.updateUserCredit(connections[userID].id, -efObject.cost, efObject.content)
-                chat.clearThread(connections[userID].id);
-                
-                console.log('User disconnected: ' + connections[userID].id);
-
-                delete connections[userID].id;
+                database.updateUserCredit(userID, -efObject.cost, efObject.content)
+                chat.clearThread(userID);
             }
+            console.log('User disconnected: ' + userID);
         });
     } else {
         console.log('Unauthenticated user attempted to connect');
