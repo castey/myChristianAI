@@ -191,13 +191,6 @@ app.post("/settings-submit", isAuthenticated, async (req, res) => {
 // settings endpoint
 app.get("/settings", isAuthenticated, async (req, res) => {
 
-    const userObject = {
-        id: req.user.id,
-        first_name: req.user.name.givenName,
-        last_name: req.user.name.familyName,
-        email: req.user.emails[0].value
-    };
-
     email = await database.getUserData(req.user.id, "email");
     favorite = await database.getUserData(req.user.id, "favorite");
 
@@ -244,7 +237,7 @@ app.get('/', isAuthenticated, async (req, res) => {
 });
 
 // Socket.IO for real-time chat
-io.on('connection', async (socket) => {
+socket.on('connection', async (socket) => {
     // Check if the user is authenticated
     if (socket.request.session && socket.request.session.passport && socket.request.session.passport.user) {
 
@@ -314,7 +307,7 @@ io.on('connection', async (socket) => {
                 database.updateUserCredit(userID, -efObject.cost, efObject.content)
                 chat.clearThread(userID);
             }
-            console.log('User disconnected');
+            console.log('User disconnected: ' + userID);
         });
     } else {
         console.log('Unauthenticated user attempted to connect');
