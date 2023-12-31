@@ -11,6 +11,8 @@ const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 
+let connections = {}
+
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -241,9 +243,9 @@ io.on('connection', async (socket) => {
     // Check if the user is authenticated
     if (socket.request.session && socket.request.session.passport && socket.request.session.passport.user) {
 
-        userID = socket.request.session.passport.user.id;
+        connections[userID] = socket.request.session.passport.user.id;
 
-        favoriteDenom = await database.getUserData(userID, "favorite");
+        favoriteDenom = await database.getUserData(connections[userID], "favorite");
 
         if (favoriteDenom == "" || !favoriteDenom) favoriteDenom = "christian";
 
@@ -259,7 +261,7 @@ io.on('connection', async (socket) => {
             }
             socket.emit('chat message', replyObject);
 
-            summary = await database.getSummary(userID)
+            summary = await database.getSummary(connections[userID])
 
             if (event.message == "") {
 
@@ -270,7 +272,7 @@ io.on('connection', async (socket) => {
             }
 
             else {
-                reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
+                reply = await chat.smartBot(event.message, event.character, event.denomination, connections[userID], summary);
 
                 replyObject = {
                     reply: reply.content,
@@ -278,16 +280,16 @@ io.on('connection', async (socket) => {
                 }
 
                 if (reply.cost && reply.cost > 0) {
-                    database.updateUserCredit(userID, -reply.cost)
+                    database.updateUserCredit(connections[userID], -reply.cost)
                 }
 
                 if (reply.sumCount == 30) {
 
-                    summary = await database.getSummary(userID)
+                    summary = await database.getSummary(connections[userID])
 
-                    // extractFacts is only passed summary because it has access to the threads[userID] object inside chat module
-                    efObject = await chat.extractFacts(userID, summary);
-                    database.updateUserCredit(userID, -efObject.cost, efObject.content)
+                    // extractFacts is only passed summary because it has access to the threads[connections[userID]] object inside chat module
+                    efObject = await chat.extractFacts(connections[userID], summary);
+                    database.updateUserCredit(connections[userID], -efObject.cost, efObject.content)
 
                 }
             }
@@ -297,17 +299,17 @@ io.on('connection', async (socket) => {
         socket.on('disconnect', async () => {
 
             // grab the summary from the database
-            summary = await database.getSummary(userID)
+            summary = await database.getSummary(connections[userID])
 
-            // extractFacts only processes and returns an object if a threads[userID] object has been created
-            efObject = await chat.extractFacts(userID, summary);
+            // extractFacts only processes and returns an object if a threads[connections[userID]] object has been created
+            efObject = await chat.extractFacts(connections[userID], summary);
 
             if (efObject) {
 
-                database.updateUserCredit(userID, -efObject.cost, efObject.content)
-                chat.clearThread(userID);
+                database.updateUserCredit(connections[userID], -efObject.cost, efObject.content)
+                chat.clearThread(connections[userID]);
             }
-            console.log('User disconnected: ' + userID);
+            console.log('User disconnected: ' + connections[userID]);
         });
     } else {
         console.log('Unauthenticated user attempted to connect');
