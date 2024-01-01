@@ -91,7 +91,7 @@ async function smartBot(message, px, denomination, userID, summary) {
 
     // log the hx array
     let genZ = ""
-    
+
     if (validPx.includes(px) && validDenoms.includes(denomination)) {
 
         if (px == "minister") {
@@ -109,7 +109,7 @@ async function smartBot(message, px, denomination, userID, summary) {
         }
         
         if (denomination == "Gen Z"){
-            genZ = "Act extremely gen z using their slang and style of writing. use emojis, dont use capitalization. be very gen Z "
+            genZ = "Act extremely gen z using their slang and style of writing. use emojis, dont use capitalization. be very gen Z. say things like no cap, on god, bussin (means very good), fr fr, skibidi(means cool kinda), rizz (charisma), sigma (lone wolf), ohio (it's all ohio), gyatt (an attractive feature on a godly woman)"
         }
         if (px == 'bible') {
             pxPreamble = "speak exclusively in Bible verses. Never say a single thing that is not a bible verse. All you say are bible verse no matter context at all. Try use esoteric verses that are not quoted often"
