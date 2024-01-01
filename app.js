@@ -12,14 +12,8 @@ const io = require('socket.io')(server);
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: process.env.IS_PRODUCTION === 'true', // secure cookies in production
-        httpOnly: true,
-        sameSite: 'strict'
-    }
+    saveUninitialized: true
 });
-
 
 // Function to check if user is authenticated
 function isAuthenticated(req, res, next) {
