@@ -98,6 +98,7 @@ function updateUserCredit(userID, creditToAdd, summary = null) {
                     if (error) {
                         return reject(error);
                     }
+                    console.log(`${userID} summary updated: ${summary.slice(0,10)}...` )
                     resolve({ userID, updatedCredit, summary });
                 });
             });
@@ -163,7 +164,7 @@ async function getUserOrCreate(userData) {
 }
 
 async function updateUserData(userID, columnName, newValue) {
-    
+
     console.log(`${userID} updated ${columnName} to ${newValue}.`)
 
     return new Promise((resolve, reject) => {
