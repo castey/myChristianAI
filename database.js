@@ -98,7 +98,7 @@ function updateUserCredit(userID, creditToAdd, summary = null) {
                     if (error) {
                         return reject(error);
                     }
-                    console.log(`${userID} summary updated: ${summary.slice(0,10)}...` )
+                    if (summary !== null ) console.log(`${userID} summary updated: ${summary.slice(0,10)}...` )
                     resolve({ userID, updatedCredit, summary });
                 });
             });
