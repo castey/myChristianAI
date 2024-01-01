@@ -163,6 +163,9 @@ async function getUserOrCreate(userData) {
 }
 
 async function updateUserData(userID, columnName, newValue) {
+    
+    console.log(`${userID} updated ${columnName} to ${newValue}.`)
+
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
