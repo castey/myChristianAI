@@ -212,6 +212,7 @@ app.post("/settings-submit", isAuthenticated, async (req, res) => {
             return res.redirect('/settings?error=Invalid email format');
         }
 
+        console.log(`Settings updated: ${userID}`)
         // Update favorite denomination
         await database.updateUserData(userID, "favorite", favoriteDenomination);
 
@@ -230,13 +231,15 @@ app.post("/settings-submit", isAuthenticated, async (req, res) => {
 // settings endpoint
 app.get("/settings", isAuthenticated, async (req, res) => {
 
-    email = await database.getUserData(req.user.id, "email");
-    favorite = await database.getUserData(req.user.id, "favorite");
-
-    databaseObject = {
+    let email = await database.getUserData(req.user.id, "email");
+    let favorite = await database.getUserData(req.user.id, "favorite");
+    
+    let databaseObject = {
         email: email,
         favorite: favorite
     }
+
+    console.log(`Settings page accessed: ${req.user.id}`)
 
     res.render('settings', { user: databaseObject })
 
