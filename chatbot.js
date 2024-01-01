@@ -51,7 +51,8 @@ const validDenoms = [
     "mormon",
     "christian",
     "Pre-Nicene",
-    "secular"
+    "secular",
+    "genz"
 ];
 
 function capFL(string) {
@@ -104,6 +105,10 @@ async function smartBot(message, px, denomination, userID, summary) {
                 px = "scholar"
             }
             pxPreamble = `You are a secular ${px} of the bible your name is ${px}, say all the things ${px} would say but from a secular view`
+        }
+
+        if (denomination == "genz"){
+            denomination = "act extremely gen z using their slang and style of writing. use emojis, dont use capitalization. be very gen Z"
         }
         if (px == 'bible') {
             pxPreamble = "speak exclusively in Bible verses. Never say a single thing that is not a bible verse. All you say are bible verse no matter context at all. Try use esoteric verses that are not quoted often"
