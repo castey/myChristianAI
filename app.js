@@ -6,32 +6,62 @@ const bodyParser = require('body-parser');
 const chat = require('./chatbot.js')
 require('dotenv').config();
 const database = require("./database.js");
-
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
-
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: {
+        secure: process.env.IS_PRODUCTION === 'true', // secure cookies in production
+        httpOnly: true,
+        sameSite: 'strict'
+    }
 });
 
+
+// Function to check if user is authenticated
+function isAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/login');
+}
+// Function to check if user is not authenticated
+function isNotAuthenticated(req, res, next) {
+    if (!req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/');
+}
+
+function logOauthRedirect(provider) {
+    return function(req, res, next) {
+        console.log(`Visitor directed to ${provider} Login`);
+        next(); // Proceed to the next middleware
+    };
+}
+
+// redirect http req to https
 app.use((req, res, next) => {
-    if (req.header('x-forwarded-proto') !== 'https') {
+    if (req.header('x-forwarded-proto') !== 'https' && process.env.IS_PRODUCTION == true) {
         res.redirect(`https://${req.header('host')}${req.url}`);
     } else {
         next();
     }
 });
 
+// use middleWare for session secret
 app.use(sessionMiddleware);
-
 io.use((socket, next) => {
     sessionMiddleware(socket.request, {}, next);
 });
 
+// use ejs rendering
 app.set('view engine', 'ejs');
+
+// serve public files
 app.use(express.static('./public'));
 
 // Body Parser Middleware to parse form data
@@ -41,7 +71,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 passport.serializeUser(function (user, done) {
     done(null, user);
 });
-
 passport.deserializeUser(function (obj, done) {
     done(null, obj);
 });
@@ -62,23 +91,55 @@ passport.use(new FacebookStrategy({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Function to check if user is authenticated
-function isAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
+// Facebook authentication routes
+app.get('/auth/facebook', isNotAuthenticated, logOauthRedirect("Facebook"), passport.authenticate('facebook', { scope: ['email'] }));
+
+app.get('/auth/facebook/callback',
+    passport.authenticate('facebook', { failureRedirect: '/login' }),
+    (req, res) => {
+        res.redirect('/');
     }
-    res.redirect('/login');
-}
-// Function to check if user is not authenticated
-function isNotAuthenticated(req, res, next) {
-    if (!req.isAuthenticated()) {
-        return next();
+);
+
+// Chat interface for authenticated users
+app.get('/', isAuthenticated, async (req, res) => {
+
+    let userObject
+
+    if (req.user.emails) {
+        userObject = {
+            id: req.user.id,
+            first_name: req.user.name.givenName,
+            last_name: req.user.name.familyName,
+            email: req.user.emails[0].value
+        };
     }
-    res.redirect('/');
-}
+
+    else {
+
+        userObject = {
+            id: req.user.id,
+            first_name: req.user.name.givenName,
+            last_name: req.user.name.familyName,
+            email: "none found"
+        };
+    }
+    // pass user object to DB for creation/login, returns 
+    const databaseObject = await database.getUserOrCreate(userObject);
+
+    res.render('chat', { user: databaseObject });
+});
+
+// Login Route
+app.get('/login', isNotAuthenticated, (req, res) => {
+    console.log("Login page accessed!")
+    res.render('login');
+
+});
 
 // Logout Route
 app.get('/logout', (req, res) => {
+    console.log(`User logged out: ${req.user.id}`)
     req.logout(function (err) {
         if (err) {
             // handle error
@@ -89,28 +150,6 @@ app.get('/logout', (req, res) => {
         res.redirect('/login');
     });
 });
-
-
-// Login Route
-app.get('/login', isNotAuthenticated, (req, res) => {
-    console.log("Login page accessed!")
-    res.render('login');
-
-});
-
-function logFacebookRedirect(req, res, next) {
-    console.log("Visitor directed to Facebook Login");
-    next(); // Proceed to the next middleware
-}
-
-// Facebook authentication routes
-app.get('/auth/facebook', isNotAuthenticated, logFacebookRedirect, passport.authenticate('facebook', { scope: ['email'] }));
-
-app.get('/auth/facebook/callback',
-    passport.authenticate('facebook', { failureRedirect: '/login' }),
-    (req, res) => {
-        res.redirect('/');
-    });
 
 // ToS endpoint
 app.get("/terms-of-service", (req, res) => {
@@ -196,7 +235,7 @@ app.post("/settings-submit", isAuthenticated, async (req, res) => {
 
 // settings endpoint
 app.get("/settings", isAuthenticated, async (req, res) => {
-    
+
     email = await database.getUserData(req.user.id, "email");
     favorite = await database.getUserData(req.user.id, "favorite");
 
@@ -208,36 +247,6 @@ app.get("/settings", isAuthenticated, async (req, res) => {
     res.render('settings', { user: databaseObject })
 
 })
-
-// Chat interface for authenticated users
-app.get('/', isAuthenticated, async (req, res) => {
-
-    let userObject
-
-    if (req.user.emails) {
-        userObject = {
-            id: req.user.id,
-            first_name: req.user.name.givenName,
-            last_name: req.user.name.familyName,
-            email: req.user.emails[0].value
-        };
-
-    }
-
-    else {
-
-        userObject = {
-            id: req.user.id,
-            first_name: req.user.name.givenName,
-            last_name: req.user.name.familyName,
-            email: "none found"
-        };
-    }
-    // pass user object to DB for creation/login, returns 
-    const databaseObject = await database.getUserOrCreate(userObject);
-
-    res.render('chat', { user: databaseObject });
-});
 
 // Socket.IO for real-time chat
 io.on('connection', async (socket) => {
@@ -252,7 +261,7 @@ io.on('connection', async (socket) => {
 
         socket.emit("favDenom", favoriteDenom);
 
-        console.log('Authenticated user connected: ' + userID);
+        console.log('User opened chat: ' + userID);
 
         socket.on('chat message', async (event) => {
 
@@ -310,7 +319,7 @@ io.on('connection', async (socket) => {
                 database.updateUserCredit(userID, -efObject.cost, efObject.content)
                 chat.clearThread(userID);
             }
-            console.log('User disconnected: ' + userID);
+            console.log('User closed chat: ' + userID);
         });
     } else {
         console.log('Unauthenticated user attempted to connect');
