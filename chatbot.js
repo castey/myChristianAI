@@ -90,7 +90,8 @@ async function smartBot(message, px, denomination, userID, summary) {
     threads[userID].hx.push({ role: "user", content: message })
 
     // log the hx array
-
+    let genZ = ""
+    
     if (validPx.includes(px) && validDenoms.includes(denomination)) {
 
         if (px == "minister") {
@@ -106,8 +107,6 @@ async function smartBot(message, px, denomination, userID, summary) {
             }
             pxPreamble = `You are a secular ${px} of the bible your name is ${px}, say all the things ${px} would say but from a secular view`
         }
-
-        let genZ = ""
         
         if (denomination == "Gen Z"){
             genZ = "Act extremely gen z using their slang and style of writing. use emojis, dont use capitalization. be very gen Z "
