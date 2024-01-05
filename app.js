@@ -282,7 +282,9 @@ io.on('connection', async (socket) => {
 
             else {
                 let reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
-
+                if (!reply){
+                    console.log("reply object not found!")
+                }
                 if (reply && reply.images) {
 
                     replyObject = {
@@ -307,7 +309,7 @@ io.on('connection', async (socket) => {
                         sender: "bot"
                     }
                 }
-                if (reply.cost && reply.cost > 0) {
+                if (reply && reply.cost && reply.cost > 0) {
                     database.updateUserCredit(userID, -reply.cost)
                 }
 
