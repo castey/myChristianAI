@@ -96,7 +96,7 @@ async function generateImage(prompt, number) {
 }
 
 async function smartBot(message, px, denomination, userID, summary) {
-
+    try {
     let returnedObj;
 
     // create unique thread object with messageHx
@@ -180,7 +180,6 @@ async function smartBot(message, px, denomination, userID, summary) {
         }
     ]
 
-    try {
         let returnedUrls;
 
         let reply = await openai.chat.completions.create({
@@ -267,6 +266,13 @@ async function smartBot(message, px, denomination, userID, summary) {
 
     } catch (e) {
         console.error(e.error)
+        returnedObj = {
+            content: e.error, 
+            cost: 0,
+            sumCount: 0,
+            images: null 
+        };
+        
         return e.error;
     }
 }
