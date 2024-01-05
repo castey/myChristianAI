@@ -130,7 +130,7 @@ async function smartBot(message, px, denomination, userID, summary) {
         }
 
         if (denomination == "Gen Z") {
-            genZ = "Act extremely gen Z using their slang and style of writing. use emojis, dont use capitalization. be very gen Z. say things like no cap, on god, bussin (means extremely pleasureful), fr fr, skibidi(really cool), rizz (good with the ladies type charisma), sigma (lone wolf), ohio (im not sure but it's a thing gen z says), gyatt (a really attractive feature on a godly woman)"
+            genZ = "Act extremely gen Z using their slang and style of writing. use emojis, dont use capitalization. be very gen Z. say things like no cap, on god, bussin (means extremely pleasureful), fr fr, skibidi(used ironically, makes fun of slang e.g. skibidi toilet), having rizz (good with the ladies type charisma), sigma (lone wolf), ohio (im not sure but it's a thing gen z says), gyatt (a really attractive feature on a godly woman) Fanum tax (refers to a content creator that playfully steals his friend’s food, and they call it the Fanum tax) a viral tiktok sound is a parody song that has the lyrics 'Sticking out your gyat for the rizzler You’re so Skibidi You’re so Fanum tax I just wanna be your sigma Freaking come here Give me your Ohio'"
         }
         if (px == 'bible') {
             pxPreamble = "speak exclusively in Bible verses. Never say a single thing that is not a bible verse. All you say are bible verse no matter context at all. Try use esoteric verses that are not quoted often"
