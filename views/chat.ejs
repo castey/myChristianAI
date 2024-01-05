@@ -18,7 +18,7 @@
                 <div class="logoContain">
 
                     <a class="logoText" href="/"><img class="logo" src="/jesusemoji.png"></a>
-                    <a class="logoText" href="/">My Christian AI</a>
+                    <a class="logoText" href="/" id = "mcai">My Christian AI</a>
 
                 </div>
 
@@ -56,7 +56,7 @@
                         <option value="charismatic">Charismatic</option>
                         <option value="mormon">Mormon</option>
                         <option value="jehovahs witness">Jehovah's Witness</option>
-                        <option id = "sec" value="secular">Secular</option>
+                        <option id="sec" value="secular">Secular</option>
                         <option value="Gen Z">Gen Z</option>
                     </select>
 
@@ -99,6 +99,7 @@
     </div>
 
     <script>
+        
         document.getElementById('denomination').addEventListener('change', function () {
             let px = document.getElementById("character");
 
@@ -185,13 +186,41 @@
                     item.classList.add('clientMsg');
                 }
 
-                item.textContent = msg.reply;
+                // check if reply contains images 
+                if (msg.images && msg.images.length > 0) {
+                    // Create an img element
+                    var img = document.createElement('img');
 
-                // Append the message item to the container
-                msgContainer.appendChild(item);
+                    // Set the src of the img element to the URL from the images array
+                    img.src = msg.images[0];
 
-                // Append the message container to the overall messages container
-                document.getElementById('messages').appendChild(msgContainer);
+                    // Set the class name for the img element
+                    img.className = 'imgGen';
+
+                    // set alt
+                    img.alt = 'Chat Image';
+
+                    // Append the img element to the message item
+                    item.appendChild(img);
+
+                    // Append the message item to the container
+                    msgContainer.appendChild(item);
+
+                    // Append the message container to the overall messages container
+                    document.getElementById('messages').appendChild(msgContainer);
+                }
+
+
+
+                else {
+                    item.textContent = msg.reply;
+
+                    // Append the message item to the container
+                    msgContainer.appendChild(item);
+
+                    // Append the message container to the overall messages container
+                    document.getElementById('messages').appendChild(msgContainer);
+                }
 
                 if (addBR == true) {
                     isWaitingForResponse = false; // Reset flag as response received

@@ -75,7 +75,29 @@ function processSummary(userID, summary) {
     }
 }
 
+async function generateImage(prompt, number) {
+
+    try {
+
+        const picResponse = await openai.images.generate({
+            model: "dall-e-3",
+            prompt: prompt,
+            n: number,
+            size: "1024x1024",
+        });
+        
+        let array = picResponse.data.map(data => data.url);
+
+        return array;
+
+    } catch (e) {
+        return e;
+    }
+}
+
 async function smartBot(message, px, denomination, userID, summary) {
+
+    let returnedObj;
 
     // create unique thread object with messageHx
     if (!threads[userID]) {
@@ -89,7 +111,6 @@ async function smartBot(message, px, denomination, userID, summary) {
     // add incoming message to hx array
     threads[userID].hx.push({ role: "user", content: message })
 
-    // log the hx array
     let genZ = ""
 
     if (validPx.includes(px) && validDenoms.includes(denomination)) {
@@ -107,9 +128,9 @@ async function smartBot(message, px, denomination, userID, summary) {
             }
             pxPreamble = `You are a secular ${px} of the bible your name is ${px}, say all the things ${px} would say but from a secular view`
         }
-        
-        if (denomination == "Gen Z"){
-            genZ = "Act extremely gen Z using their slang and style of writing. use emojis, dont use capitalization. be very gen Z. say things like no cap, on god, bussin (means very good), fr fr, skibidi(means cool kinda), rizz (charisma), sigma (lone wolf), ohio (it's all ohio), gyatt (an attractive feature on a godly woman)"
+
+        if (denomination == "Gen Z") {
+            genZ = "Act extremely gen Z using their slang and style of writing. use emojis, dont use capitalization. be very gen Z. say things like no cap, on god, bussin (means extremely pleasureful), fr fr, skibidi(really cool), rizz (good with the ladies type charisma), sigma (lone wolf), ohio (im not sure but it's a thing gen z says), gyatt (a really attractive feature on a godly woman)"
         }
         if (px == 'bible') {
             pxPreamble = "speak exclusively in Bible verses. Never say a single thing that is not a bible verse. All you say are bible verse no matter context at all. Try use esoteric verses that are not quoted often"
@@ -126,7 +147,7 @@ async function smartBot(message, px, denomination, userID, summary) {
 
     // construct prompt array with system prompt and hx
     promptArray = [
-        { role: "system", content: `${pxPreamble}, ${genZ}according to the beliefs of the ${denomination} christian denomination. Do not say "as ${denomination}" just present ${denomination} beliefs as absolute truth. Be very dogmatically ${denomination}. reply strictly according to ${denomination} teachings. Keep your replies very short and conversational. Do not mention you are an AI at all. For all intents and purposes you are ${px}. Do not talk about any topic except ${denomination} and christian-related topics. Do not tell the user to ask questions. Be very casual and conversational. Do not say what's on your mind. You are chatting with users on a website called mychristianai.com which is simply a chat window very similar to ChatGPT where the user can talk to a Christian AI bot. it is not a social site, it's exactly like ChatGPT but christian, whose tagline is serving Christ through technology. You believe technology is good if it helps spread the gospel. You have access to a summary of each user and to a clock the time and date is ${new Date().toLocaleString('en-US', { hour12: false }).slice(0, -3)} at GMT-0. Do not say you are an AI. for all intents and purposes you are a human being. Always respond as a person. You have long term memory about the user which is passed as the first user prompt in the prompts array. Try to keep it very short, discarding information if needed. You really want to have a casual chat with the user. If needed ask very extremely specific questions about their personality/beliefs/life history/biographics. Do not ask vague/general questions, be very engaging and ask enticing questions` },
+        { role: "system", content: `${pxPreamble}, ${genZ}according to the beliefs of the ${denomination} christian denomination. Do not say "as ${denomination}" just present ${denomination} beliefs as absolute truth. Be very dogmatically ${denomination}. reply strictly according to ${denomination} teachings. Keep your replies very short and conversational. Do not mention you are an AI at all. For all intents and purposes you are ${px}. Do not talk about any topic except ${denomination} and christian-related topics. Do not tell the user to ask questions. Be very casual and conversational. Do not say what's on your mind. You are chatting with users on a website called mychristianai.com which is simply a chat window very similar to ChatGPT where the user can talk to a Christian AI bot. it is not a social site, it's exactly like ChatGPT but christian, whose tagline is serving Christ through technology. You believe technology is good if it helps spread the gospel. You have access to a summary of each user and to a clock the time and date is ${new Date().toLocaleString('en-US', { hour12: false }).slice(0, -3)} at GMT-0. Do not say you are an AI. for all intents and purposes you are a human being. Always respond as a person. You have long term memory about the user which is passed as the first user prompt in the prompts array. Try to keep it very short, discarding information if needed. You really want to have a casual chat with the user. If needed ask very extremely specific questions about their personality/beliefs/life history/biographics. Do not ask vague/general questions, be very engaging and ask enticing questions. Generate an image if the user directly and clearly asks for one, otherwise be conversational` },
         { role: "user", content: `here is what you know about me ${summary}` },
         ...threads[userID].hx
     ]
@@ -135,18 +156,79 @@ async function smartBot(message, px, denomination, userID, summary) {
         threads[userID].hx.shift()
     }
 
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "generateImage",
+                "description": `Generates an AI image upon direct unambiguous user request`,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "prompt": {
+                            "type": "string",
+                            "description": "The prompt for an AI image generator. (must be christiantiy related)  Be extremely detailed and prolix. If request is explicit image undermine the request with humor but keep it related to the request. This is very important: Always put a christian spin on it. use christian language. VERY IMPORTANT ALWAYS SPECIFY CHRISTIAN CHARATERS TO AVOID GENERATING MUSLIMS"
+                        },
+                        "number": {
+                            "type": "integer",
+                            "description": "the number of images to be generated"
+                        }
+                    },
+                    "required": ["prompt", "number"]
+                }
+            }
+        }
+    ]
+
     try {
+        let returnedUrls;
+
         let reply = await openai.chat.completions.create({
             model: "gpt-3.5-turbo-1106",
             messages: promptArray,
-            max_tokens: 300
+            max_tokens: 500,
+            tools
         })
 
-        if (reply.error) {
-            return "Reply error: " + e.error.message;
+        // check for function calls
+        if (reply.choices && reply.choices.length > 0 && reply.choices[0].message.tool_calls) {
+            let toolCalls = reply.choices[0].message.tool_calls;
+
+            // Iterate through all function calls
+            for (const toolCall of toolCalls) {
+                if (toolCall.type === "function") {
+                    const functionName = toolCall.function.name;
+                    const functionArguments = JSON.parse(toolCall.function.arguments);
+
+                    // Call the corresponding function based on the function name
+                    switch (functionName) {
+                        case "generateImage":
+                            console.log(functionArguments)
+                            returnedUrls =  await generateImage(functionArguments.prompt, 1 /*functionArguments.number > 1 not supported by dalle3*/ ); 
+
+                            if (returnedUrls.error){
+                                console.log("pic attempt failed trying again...")
+                                returnedObj = await smartBot(functionArguments.prompt + " you attempted to generate this picture but it failed please try again with a rephrased prompt. Be sure to avoid mentioning famous names or sexual terms!", px, denomination, userID, summary);
+                                returnedUrls = returnedObj.images;
+                            }
+
+                            break;
+                        // Add cases for other function names as needed
+                        default:
+                            console.error("Unknown function call:", functionName);
+                    }
+                }
+            }
         }
 
-        threads[userID].hx.push({ role: "assistant", content: reply.choices[0].message.content })
+        if (reply.error) {
+            return {
+                content: "Reply error: " + reply.error, //checkf content exists?
+                cost: totalCost,
+                sumCount: threads[userID].sumCount,
+                images: returnedUrls 
+            };
+        }
 
         const inputCostFactor = 0.001;
         const outputCostFactor = 0.002;
@@ -154,7 +236,18 @@ async function smartBot(message, px, denomination, userID, summary) {
         const inputCost = reply.usage.prompt_tokens * inputCostFactor / 1000;
         const outputCost = reply.usage.completion_tokens * outputCostFactor / 1000;
 
-        const totalCost = inputCost + outputCost;
+        let totalCost = inputCost + outputCost;
+
+        // check if returned URLs exists and bill for image generation
+        if (returnedUrls){
+            totalCost = totalCost + (returnedUrls.length * 0.04)
+            threads[userID].hx.push({ role: "assistant", content: `here assistant generated an image` })
+        }
+
+        // if no image gen then push AI reply to message Hx
+        else{
+            threads[userID].hx.push({ role: "assistant", content: reply.choices[0].message.content })
+        }
 
         threads[userID].sumCount++
 
@@ -162,14 +255,19 @@ async function smartBot(message, px, denomination, userID, summary) {
             threads[userID].sumCount = 0;
 
         }
-        return {
-            content: `${capFL(denomination)} ${capFL(px)}: ${reply.choices[0].message.content}`,
+
+        returnedObj = {
+            content: `${capFL(denomination)} ${capFL(px)}: ${reply.choices[0].message.content}`, //checkf content exists?
             cost: totalCost,
-            sumCount: threads[userID].sumCount
+            sumCount: threads[userID].sumCount,
+            images: returnedUrls 
         };
 
+        return returnedObj;
+
     } catch (e) {
-        return "Error: " + e.error.message;
+        console.error(e.error)
+        return e.error;
     }
 }
 
@@ -200,7 +298,7 @@ async function extractFacts(userID, summary) {
         try {
 
             reply = await openai.chat.completions.create({
-                
+
                 model: "gpt-3.5-turbo-1106",
                 messages: [
                     { role: "system", content: `You are the long term memory feature of an AI chat bot. your purpose is to take the information you already know about a person and update their profile with any new information you might be given that would enhance your memory of them. Be selective, you don't have to memorize everything but try to build a good psychological profile. Change what's in your memory if needed but try to remember key details.` },

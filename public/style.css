@@ -16,6 +16,7 @@ body {
 }
 
 .top-bar {
+    height: 80px;
     background-color: rgb(73, 0, 0);
     /* Dark red */
     color: #eaeaea;
@@ -33,6 +34,7 @@ body {
     display: flex;
     justify-content: inherit;
     align-items: inherit;
+    height: 80px;
 }
 
 .top-bar h2,
@@ -61,9 +63,17 @@ body {
     width: 90%;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 666px) {
     body{
         height: 90vh;
+    }
+
+    #mcai {
+        display: none;
+    }
+    
+    .user-profile p{
+        display: none;
     }
 }
 
@@ -143,13 +153,13 @@ form {
 
 .logoContain {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
 }
 
 .logo {
-    height: 80px;
-    width: 80px;
+    height: 60px;
+    width: 60px;
     margin-top: 10px;
     background-color: #230606;
     padding: 12px;
@@ -163,6 +173,10 @@ form {
     font-size: 1.5em;
     text-decoration: none;
     margin-top: 10px;
+}
+
+#mcai{
+    margin-left: 30px;
 }
 
 button {
@@ -228,4 +242,10 @@ button {
 }
 .logout-button:hover, .settings-button:hover {
     background-color: #a3000e;
+}
+
+.imgGen{
+    width: 100%;
+    max-width: 640px;
+    border-radius: 10px;
 }

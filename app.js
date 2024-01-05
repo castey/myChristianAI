@@ -31,7 +31,7 @@ function isNotAuthenticated(req, res, next) {
 }
 
 function logOauthRedirect(provider) {
-    return function(req, res, next) {
+    return function (req, res, next) {
         console.log(`Visitor directed to ${provider} Login`);
         next(); // Proceed to the next middleware
     };
@@ -233,7 +233,7 @@ app.get("/settings", isAuthenticated, async (req, res) => {
 
     let email = await database.getUserData(req.user.id, "email");
     let favorite = await database.getUserData(req.user.id, "favorite");
-    
+
     let databaseObject = {
         email: email,
         favorite: favorite
@@ -262,13 +262,15 @@ io.on('connection', async (socket) => {
 
         socket.on('chat message', async (event) => {
 
+            let replyObject
+
             replyObject = {
                 reply: event.message,
                 sender: "client"
             }
             socket.emit('chat message', replyObject);
 
-            summary = await database.getSummary(userID)
+            let summary = await database.getSummary(userID)
 
             if (event.message == "") {
 
@@ -279,13 +281,25 @@ io.on('connection', async (socket) => {
             }
 
             else {
-                reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
+                let reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
 
-                replyObject = {
-                    reply: reply.content,
-                    sender: "bot"
+                if (reply && reply.images) {
+
+                    replyObject = {
+                        images: reply.images,
+                        sender: "bot"
+                    }
+
                 }
 
+                else {
+                    replyObject = {
+                        reply: reply.content,
+
+                        sender: "bot"
+                    }
+
+                }
                 if (reply.cost && reply.cost > 0) {
                     database.updateUserCredit(userID, -reply.cost)
                 }
