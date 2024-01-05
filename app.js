@@ -39,6 +39,7 @@ function logOauthRedirect(provider) {
 
 // redirect http req to https
 app.use((req, res, next) => {
+    console.log(process.env.IS_PRODUCTION)
     if (req.header('x-forwarded-proto') !== 'https' && process.env.IS_PRODUCTION == true) {
         res.redirect(`https://${req.header('host')}${req.url}`);
     } else {
