@@ -12,8 +12,6 @@ const io = require('socket.io')(server);
 
 // redirect http req to https
 app.use((req, res, next) => {
-    console.log(req)
-    console.log(process.env.IS_PRODUCTION)
     if (req.header('x-forwarded-proto') !== 'https' && process.env.IS_PRODUCTION == true) {
         res.redirect(`https://${req.header('host')}${req.url}`);
     } else {
