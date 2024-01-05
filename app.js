@@ -12,13 +12,16 @@ const io = require('socket.io')(server);
 
 // redirect http req to https
 app.use((req, res, next) => {
-    if (req.header('x-forwarded-proto') !== 'https' && process.env.IS_PRODUCTION == true) {
-        res.redirect(`https://${req.header('host')}${req.url}`);
-        console.log("redirect successful")
+
+    // Using req.get for header access
+    if (req.get('x-forwarded-proto') !== 'https' && process.env.IS_PRODUCTION === 'true') {
+        console.log("Redirecting to HTTPS");
+        res.redirect(`https://${req.get('host')}${req.url}`);
     } else {
         next();
     }
 });
+
 
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET,
