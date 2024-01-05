@@ -292,13 +292,20 @@ io.on('connection', async (socket) => {
 
                 }
 
-                else {
+                else if(reply && reply.content){
                     replyObject = {
                         reply: reply.content,
-
                         sender: "bot"
                     }
+                }
 
+                else{
+                    console.log("Reply ERROR! ")
+                    console.log(reply)
+                    replyObject = {
+                        reply: "Looks like there was an issue with the server, let's pray it gets fixed soon!",
+                        sender: "bot"
+                    }
                 }
                 if (reply.cost && reply.cost > 0) {
                     database.updateUserCredit(userID, -reply.cost)
