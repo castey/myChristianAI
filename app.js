@@ -76,7 +76,7 @@ passport.deserializeUser(function (obj, done) {
 });
 
 // Use the FacebookStrategy within Passport
-/*passport.use(new FacebookStrategy({
+passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_CLIENT_ID,
     clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
     callbackURL: process.env.FACEBOOK_CALLBACK_URL,
@@ -89,25 +89,6 @@ passport.deserializeUser(function (obj, done) {
     })
 );
 
-// TikTok Strategy Configuration
-passport.use(new OAuth2Strategy({
-    authorizationURL: 'https://open-api.tiktok.com/platform/oauth/connect',
-    tokenURL: 'https://open-api.tiktok.com/oauth/access_token',
-    clientID: process.env.TIKTOK_APP_ID,
-    clientSecret: process.env.TIKTOK_CLIENT_SECRET,
-    callbackURL: process.env.TIKTOK_CALLBACK_URL,
-    scope: ['user.info.basic']
-  },
-  function(accessToken, refreshToken, profile, done) {
-    // Here you would use the profile information
-    // coming from TikTok to find or create a user in your database
-    User.findOrCreate({ tiktokId: profile.id }, function (err, user) {
-      return done(err, user);
-    });
-  }
-));
-*/
-
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -119,17 +100,6 @@ app.get('/auth/facebook/callback',
     (req, res) => {
         res.redirect('/');
     }
-);
-
-// TikTok Authentication Routes
-app.get('/auth/tiktok', passport.authenticate('oauth2'));
-
-app.get('/auth/tiktok/callback', 
-  passport.authenticate('oauth2', { failureRedirect: '/login' }),
-  function(req, res) {
-    // Successful authentication, redirect home.
-    res.redirect('/');
-  }
 );
 
 // Chat interface for authenticated users

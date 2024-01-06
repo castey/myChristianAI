@@ -21,6 +21,7 @@
     "passport": "^0.7.0",
     "passport-facebook": "^3.0.0",
     "passport-oauth2": "^1.7.0",
+    "passport-tiktok-auth": "^1.0.8",
     "socket.io": "^4.7.2"
   }
 }
