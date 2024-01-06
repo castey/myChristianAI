@@ -76,7 +76,7 @@ passport.deserializeUser(function (obj, done) {
 });
 
 // Use the FacebookStrategy within Passport
-passport.use(new FacebookStrategy({
+/*passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_CLIENT_ID,
     clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
     callbackURL: process.env.FACEBOOK_CALLBACK_URL,
@@ -106,7 +106,7 @@ passport.use(new OAuth2Strategy({
     });
   }
 ));
-
+*/
 
 app.use(passport.initialize());
 app.use(passport.session());
