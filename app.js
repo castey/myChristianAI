@@ -2,7 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
-const OAuth2Strategy = require('passport-oauth2').Strategy;
+const TiktokStrategy = require('passport-tiktok-auth').Strategy;
 const bodyParser = require('body-parser');
 const chat = require('./chatbot.js')
 require('dotenv').config();
@@ -22,7 +22,6 @@ app.use((req, res, next) => {
         next();
     }
 });
-
 
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET,
@@ -102,12 +101,37 @@ app.get('/auth/facebook/callback',
     }
 );
 
+// TikTok strategy 
+passport.use(new TiktokStrategy({
+    clientID: process.env.TIKTOK_CLIENT_ID, // Your TikTok Client ID
+    clientSecret: process.env.TIKTOK_CLIENT_SECRET, // Your TikTok Client Secret
+    callbackURL: process.env.TIKTOK_CALLBACK_URL,
+    scope: ['user.info.basic']
+  },
+  function(accessToken, refreshToken, profile, done) {
+    User.findOrCreate({ tiktokId: profile.id }, function (err, user) {
+        return done(err, user);
+    });
+  }
+));
+
+// TikTok authentication routes
+app.get('/auth/tiktok', passport.authenticate('tiktok'));
+
+app.get('/auth/tiktok/callback', 
+    passport.authenticate('tiktok', { failureRedirect: '/login' }),
+    function(req, res) {
+        // Successful authentication, redirect home.
+        res.redirect('/');
+    }
+);
+
 // Chat interface for authenticated users
 app.get('/', isAuthenticated, async (req, res) => {
 
     let userObject
 
-    if (req.user.emails) {
+    if (req.user.emails && req.user.emails[0].value) {
         userObject = {
             id: req.user.id,
             first_name: req.user.name.givenName,
@@ -116,7 +140,7 @@ app.get('/', isAuthenticated, async (req, res) => {
         };
     }
 
-    else {
+    else if(!req.user.emails){
 
         userObject = {
             id: req.user.id,
@@ -124,6 +148,9 @@ app.get('/', isAuthenticated, async (req, res) => {
             last_name: req.user.name.familyName,
             email: "none found"
         };
+    }
+    else {
+        console.log(req)
     }
     // pass user object to DB for creation/login, returns 
     const databaseObject = await database.getUserOrCreate(userObject);
