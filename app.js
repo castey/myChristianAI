@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
+const OAuth2Strategy = require('passport-oauth2').Strategy;
 const bodyParser = require('body-parser');
 const chat = require('./chatbot.js')
 require('dotenv').config();
@@ -85,7 +86,27 @@ passport.use(new FacebookStrategy({
         process.nextTick(function () {
             return done(null, profile);
         });
-    }));
+    })
+);
+
+// TikTok Strategy Configuration
+passport.use(new OAuth2Strategy({
+    authorizationURL: 'https://open-api.tiktok.com/platform/oauth/connect',
+    tokenURL: 'https://open-api.tiktok.com/oauth/access_token',
+    clientID: process.env.TIKTOK_APP_ID,
+    clientSecret: process.env.TIKTOK_CLIENT_SECRET,
+    callbackURL: process.env.TIKTOK_CALLBACK_URL,
+    scope: ['user.info.basic']
+  },
+  function(accessToken, refreshToken, profile, done) {
+    // Here you would use the profile information
+    // coming from TikTok to find or create a user in your database
+    User.findOrCreate({ tiktokId: profile.id }, function (err, user) {
+      return done(err, user);
+    });
+  }
+));
+
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -98,6 +119,17 @@ app.get('/auth/facebook/callback',
     (req, res) => {
         res.redirect('/');
     }
+);
+
+// TikTok Authentication Routes
+app.get('/auth/tiktok', passport.authenticate('oauth2'));
+
+app.get('/auth/tiktok/callback', 
+  passport.authenticate('oauth2', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  }
 );
 
 // Chat interface for authenticated users
@@ -287,7 +319,7 @@ io.on('connection', async (socket) => {
 
             else {
                 let reply = await chat.smartBot(event.message, event.character, event.denomination, userID, summary);
-                if (!reply){
+                if (!reply) {
                     console.log("reply object not found!")
                 }
                 if (reply && reply.images) {
@@ -299,14 +331,14 @@ io.on('connection', async (socket) => {
 
                 }
 
-                else if(reply && reply.content){
+                else if (reply && reply.content) {
                     replyObject = {
                         reply: reply.content,
                         sender: "bot"
                     }
                 }
 
-                else{
+                else {
                     console.log("Reply ERROR! ")
                     console.log(reply)
                     replyObject = {
