@@ -68,6 +68,96 @@
         .pplinkdiv {
             margin-top: 14px;
         }
+
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 666px;
+            border-radius: 20px;
+            
+        }
+
+        /* Close Button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .inputcontainer{
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Input fields styling */
+        .modal-content input[type="text"],
+        .modal-content input[type="password"] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* Button styling */
+        .modal-content input[type="submit"] {
+            width: 48%;
+            /* Half width */
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 1%;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-content input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        /* Container for buttons */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        #modalform{
+            display: flex;
+            flex-direction: column;
+            padding-top: 40px;
+        }
     </style>
 </head>
 
@@ -81,21 +171,69 @@
         <div class="pplinkdiv"><a href="/terms-of-service" class="pplink">Terms of Service</a></div>
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        <!-- Email/Password Login Button -->
+        <!--<button id="emailPassBtn" class="login-button">Login with Email/Password</button> -->
+
+        <!-- The Modal -->
+        <div id="myModal" class="modal">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <form action="/emailpasscreate" method="post" id="modalform">
+                    <div class="inputcontainer">
+                        <input type="text" id="email" name="email" placeholder="Email">
+                        <input type="password" id="password" name="password" placeholder="Password">
+                    </div>
+
+                    <div class="button-container">
+                        <form action="/emailpasslogin" method="post">
+                            <input type="submit" value="Logout">
+                        </form>
+                        <input type="submit" value="Login">
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
     <script type="text/javascript">
-        var sc_project=12952916; 
-        var sc_invisible=1; 
-        var sc_security="ea2f6d37"; 
-        </script>
-        <script type="text/javascript"
-        src="https://www.statcounter.com/counter/counter.js"
-        async></script>
-        <noscript><div class="statcounter"><a title="Web Analytics"
-        href="https://statcounter.com/" target="_blank"><img
-        class="statcounter"
-        src="https://c.statcounter.com/12952916/0/ea2f6d37/1/"
-        alt="Web Analytics"
-        referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+        var sc_project = 12952916;
+        var sc_invisible = 1;
+        var sc_security = "ea2f6d37";
+
+        // Get the modal
+        var modal = document.getElementById("myModal");
+
+        // Get the button that opens the modal
+        var btn = document.getElementById("emailPassBtn");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal 
+        btn.onclick = function () {
+            modal.style.display = "block";
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+    </script>
+    <script type="text/javascript" src="https://www.statcounter.com/counter/counter.js" async></script>
+    <noscript>
+        <div class="statcounter"><a title="Web Analytics" href="https://statcounter.com/" target="_blank"><img
+                    class="statcounter" src="https://c.statcounter.com/12952916/0/ea2f6d37/1/" alt="Web Analytics"
+                    referrerPolicy="no-referrer-when-downgrade"></a></div>
+    </noscript>
 </body>
 
 </html>
