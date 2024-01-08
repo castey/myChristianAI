@@ -106,7 +106,6 @@ function updateUserCredit(userID, creditToAdd, summary = null) {
     });
 }
 
-
 async function getUserOrCreate(userData) {
     return new Promise((resolve, reject) => {
         // Validate userData object structure
@@ -197,7 +196,7 @@ async function deleteUser(userID) {
                 return reject(err);
             }
 
-            const query = `DELETE FROM users WHERE userID = ?`;
+            const query = `UPDATE users SET userID = NULL WHERE userID = ?`;
             connection.query(query, [userID], (error, results) => {
                 connection.release(); // Always release the connection back to the pool
                 if (error) {
