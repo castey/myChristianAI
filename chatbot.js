@@ -247,8 +247,15 @@ async function smartBot(message, px, denomination, userID, summary) {
         }
 
         // if no image gen then push AI reply to message Hx
-        else{
-            threads[userID].hx.push({ role: "assistant", content: reply.choices[0].message.content })
+        else {
+            if(!reply.choices[0].message.content){
+                content = "there was an error with this message!";
+            }
+
+            else{
+                content = reply.choices[0].message.content;
+            }
+            threads[userID].hx.push({ role: "assistant", content: content });
         }
 
         threads[userID].sumCount++
