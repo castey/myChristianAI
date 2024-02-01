@@ -303,7 +303,7 @@ async function extractFacts(userID, summary) {
                             "description": "A detailed description of the user. This should be a comprehensive and lengthy text that covers relevant aspects of the user's profile, preferences, and history Make a list of several attributes and update them as needed. Merge any new information with what you already know about a user without forgetting current info take what you already know and add to it for this argument/parameter"
                         }
                     },
-                    "required": ["name", "about"]
+                    "required": ["about"]
                 }
             }
         }
@@ -336,7 +336,7 @@ async function extractFacts(userID, summary) {
 
             const totalCost = inputCost + outputCost;
 
-            factSummary = JSON.parse(reply.choices[0].message.tool_calls[0].function.arguments).about;
+            const factSummary = JSON.parse(reply.choices[0].message.tool_calls[0].function.arguments).about;
 
             return {
                 content: factSummary,
